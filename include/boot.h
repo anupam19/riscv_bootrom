@@ -2,6 +2,7 @@
 #define BOOT_H
 
 #include <stdint.h>
+
 #include "uart.h"
 
 void boot_main(void) __attribute__((noreturn));
