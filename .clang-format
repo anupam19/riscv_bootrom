@@ -1,0 +1,16 @@
+---
+BasedOnStyle: LLVM
+Language: C
+Standard: C11
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+PointerAlignment: Right
+SpaceAfterCStyleCast: true
+SpaceBeforeParens: ControlStatements
+BreakBeforeBraces: Linux
+SpacesBeforeTrailingComments: 1
+ColumnLimit: 100
+AllowShortFunctionsOnASingleLine: None
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false

@@ -3,13 +3,11 @@
 
 void boot_main(void)
 {
-    /* Optional UART debug output */
 #if ENABLE_UART_DEBUG
     uart_init();
     uart_puts("BootROM: Starting...\n");
 #endif
 
-    /* Platform-specific initialization (empty for generic) */
     platform_init();
 
 #if ENABLE_UART_DEBUG
@@ -18,11 +16,11 @@ void boot_main(void)
 
     /* Jump to next stage (BL2 or bootloader)
        Address must be provided by platform or hardcoded */
-    void (*next_stage)(void) = (void (*)(void))0x80020000;
+    void (*next_stage)(void) = (void (*)(void)) 0x80020000;
     next_stage();
 
     /* In case jump fails, loop forever */
     while (1) {
-        __asm__ volatile ("wfi");
+        __asm__ volatile("wfi");
     }
 }
