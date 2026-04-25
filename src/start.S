@@ -11,15 +11,26 @@ _start:
     /* Enforce 16-byte stack alignment per ABI (round down) */
     andi sp, sp, -16
 
-    /* Zero .bss section */
-    la t0, __bss_start
-    la t1, __bss_end
-    beq t0, t1, 2f
-1:
-    sw zero, 0(t0)
-    addi t0, t0, 4
-    blt t0, t1, 1b
-2:
+     /* Zero .bss section (64-bit aware) */
+#if __riscv_xlen == 64
+     la t0, __bss_start
+     la t1, __bss_end
+     beq t0, t1, 2f
+ 1:
+     sd zero, 0(t0)
+     addi t0, t0, 8
+     blt t0, t1, 1b
+ 2:
+#else
+     la t0, __bss_start
+     la t1, __bss_end
+     beq t0, t1, 2f
+ 1:
+     sw zero, 0(t0)
+     addi t0, t0, 4
+     blt t0, t1, 1b
+ 2:
+#endif
 
     /* Install trap handler (direct mode) */
     la t0, trap_entry
@@ -43,10 +54,16 @@ _start:
     .align 2
     .globl trap_entry
     .type trap_entry, @function
-trap_entry:
-    /* Minimal stack frame for ABI compliance (if we call C) */
-    addi sp, sp, -16
-    sw ra, 8(sp)          /* Save return address (for debugging) */
+ trap_entry:
+     /* Minimal stack frame for ABI compliance (if we call C) */
+     addi sp, sp, -16
+-#if __riscv_xlen == 64
++    /* Save return address (64-bit on RV64, 32-bit on RV32) */
++#if __riscv_xlen == 64
+     sd ra, 8(sp)          /* Save return address (for debugging) */
+ #else
+     sw ra, 8(sp)          /* Save return address (for debugging) */
+ #endif
 
     /* Call C trap handler */
     jal ra, trap_handler
