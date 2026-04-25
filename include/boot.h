@@ -55,7 +55,7 @@ static inline unsigned long csr_read(unsigned long csr)
 
 static inline void csr_write(unsigned long csr, unsigned long val)
 {
-    __asm__ volatile("csrw %0, %1" :: "i"(csr), "r"(val));
+    __asm__ volatile("csrw %0, %1" : : "i"(csr), "r"(val));
 }
 
 #ifndef ENABLE_UART_DEBUG
