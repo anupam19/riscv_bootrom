@@ -1,6 +1,36 @@
 #include "boot.h"
 #include "uart.h"
 
+/* Optional FENCE.I self-modifying code test.
+   Compile with -DENABLE_FENCE_I_TEST to run.
+   This verifies that instruction fetches see prior stores after FENCE.I. */
+#ifdef ENABLE_FENCE_I_TEST
+static void test_fence_i(void)
+{
+    /* Code buffer in RAM (must be executable) */
+    volatile uint32_t *code_buf = (volatile uint32_t *)0x80010000;
+    uint32_t orig_instr = code_buf[0];
+    uint32_t new_instr;
+
+    /* Build a simple instruction: addi x0, x0, 0  (NOP) encoded as 0x00000013 */
+    new_instr = 0x00000013;
+
+    /* Store new instruction */
+    code_buf[0] = new_instr;
+
+    /* Ensure store completes before instruction fetch */
+    fence_i();
+
+    /* Execute from the modified location */
+    void (*func)(void) = (void (*)(void))code_buf;
+    func();
+
+    /* Restore original instruction */
+    code_buf[0] = orig_instr;
+    fence_i();
+}
+#endif
+
 void boot_main(void)
 {
 #if ENABLE_UART_DEBUG
@@ -12,6 +42,10 @@ void boot_main(void)
 
 #if ENABLE_UART_DEBUG
     uart_puts("BootROM: Jumping to next stage\n");
+#endif
+
+#ifdef ENABLE_FENCE_I_TEST
+    test_fence_i();
 #endif
 
     /* Jump to next stage using full 32-bit address construction
