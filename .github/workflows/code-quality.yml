@@ -27,9 +27,9 @@ jobs:
       - name: Check C code formatting
         run: |
           echo "Checking formatting for all C files..."
-          # Use git ls-files to get tracked C/H files reliably
+          # Use git ls-files to get tracked C/H files
           git ls-files '*.c' '*.h' | \
-          xargs -r -d '\n' clang-format --dry-run --Werror -style=file \
+          xargs -r clang-format --dry-run --Werror -style=file \
           || { echo "::error::Code formatting issues found. Run 'git ls-files \"*.c\" \"*.h\" | xargs clang-format -i' to fix."; exit 1; }
           echo "All files properly formatted"
 
