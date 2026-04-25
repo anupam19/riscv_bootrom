@@ -1,10 +1,7 @@
 #include "boot.h"
 #include "uart.h"
-#ifdef ENABLE_TIMER_TEST
-#include "timer.h"
-#endif
-#ifdef ENABLE_PLIC_TEST
-#include "plic.h"
+#ifdef ENABLE_LOADER
+#include "loader.h"
 #endif
 
 /* Optional FENCE.I self-modifying code test.
@@ -54,18 +51,22 @@ void boot_main(void)
     test_fence_i();
 #endif
 
+/* Boot path: either load next-stage image from flash or jump directly */
+#ifndef ENABLE_LOADER
     /* Jump to next stage using full 32-bit address construction
        (LUI + ADDI + JALR). This demonstrates PIC-style jump
        without using a direct function call. */
-
     uintptr_t target = 0x80020000UL;
-
     __asm__ volatile("lui x10, %0\n\t"
                      "addi x10, x10, %1\n\t"
                      "jalr x0, x10, 0"
                      :
                      : "i"(target >> 12), "i"(target & 0xFFF)
                      : "x10", "memory");
+#else
+    /* Load and jump to next stage from flash */
+    load_and_jump();
+#endif
 
     while (1) {
         __asm__ volatile("wfi");
