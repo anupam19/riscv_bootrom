@@ -13,17 +13,17 @@ uint64_t gpr[32] = {0};
 static int csr_implemented(uint16_t addr)
 {
     switch (addr) {
-    case 0x300: /* mstatus */
-    case 0x304: /* mie */
-    case 0x305: /* mtvec */
-    case 0x341: /* mepc */
-    case 0x342: /* mcause */
-    case 0x343: /* mtval */
-    case 0x344: /* mip */
-    case 0xC00: /* cycle (RO) */
-    case 0xC01: /* instret (RO) */
-    case 0xC80: /* cycle (RO, 64-bit alias) */
-    case 0xC81: /* instret (RO, 64-bit alias) */
+    case 0x300:
+    case 0x304:
+    case 0x305:
+    case 0x341:
+    case 0x342:
+    case 0x343:
+    case 0x344:
+    case 0xC00:
+    case 0xC01:
+    case 0xC80:
+    case 0xC81:
         return 1;
     default:
         return 0;
@@ -76,21 +76,21 @@ void exec_csr(uint32_t instr)
 
     int will_write = 0;
     switch (funct3) {
-    case 0x1: /* CSRRW */
+    case 0x1:
         will_write = 1;
         val = (rs1 == 0) ? 0 : gpr[rs1];
         break;
-    case 0x2: /* CSRRS */
+    case 0x2:
         will_write = (rs1 != 0);
         if (rs1 != 0)
             val = gpr[rs1];
         break;
-    case 0x3: /* CSRRC */
+    case 0x3:
         will_write = (rs1 != 0);
         if (rs1 != 0)
             val = gpr[rs1];
         break;
-    case 0x5: /* CSRRWI */
+    case 0x5:
         will_write = 1;
         val = (uint64_t)uimm;
         break;
