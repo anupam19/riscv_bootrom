@@ -13,20 +13,20 @@ uint64_t gpr[32] = {0};
 static int csr_implemented(uint16_t addr)
 {
     switch (addr) {
-        case 0x300: /* mstatus */
-        case 0x304: /* mie */
-        case 0x305: /* mtvec */
-        case 0x341: /* mepc */
-        case 0x342: /* mcause */
-        case 0x343: /* mtval */
-        case 0x344: /* mip */
-        case 0xC00: /* cycle (RO) */
-        case 0xC01: /* instret (RO) */
-        case 0xC80: /* cycle (RO, 64-bit alias) */
-        case 0xC81: /* instret (RO, 64-bit alias) */
-            return 1;
-        default:
-            return 0;
+    case 0x300: /* mstatus */
+    case 0x304: /* mie */
+    case 0x305: /* mtvec */
+    case 0x341: /* mepc */
+    case 0x342: /* mcause */
+    case 0x343: /* mtval */
+    case 0x344: /* mip */
+    case 0xC00: /* cycle (RO) */
+    case 0xC01: /* instret (RO) */
+    case 0xC80: /* cycle (RO, 64-bit alias) */
+    case 0xC81: /* instret (RO, 64-bit alias) */
+        return 1;
+    default:
+        return 0;
     }
 }
 
@@ -34,10 +34,13 @@ static int csr_implemented(uint16_t addr)
 static int csr_writable(uint16_t addr)
 {
     switch (addr) {
-        case 0xC00: case 0xC01: case 0xC80: case 0xC81:
-            return 0; /* read-only */
-        default:
-            return 1;
+    case 0xC00:
+    case 0xC01:
+    case 0xC80:
+    case 0xC81:
+        return 0; /* read-only */
+    default:
+        return 1;
     }
 }
 
@@ -53,11 +56,11 @@ static void emu_trap_illegal(void)
 /* Execute one CSR instruction (software model) */
 void exec_csr(uint32_t instr)
 {
-    uint16_t csr  = (instr >> 20) & 0xFFF;
-    uint8_t  funct3 = (instr >> 12) & 0x7;
-    uint8_t  rd   = (instr >> 7)  & 0x1F;
-    uint8_t  rs1  = (instr >> 15) & 0x1F;
-    uint8_t  uimm = rs1 & 0x1F;
+    uint16_t csr = (instr >> 20) & 0xFFF;
+    uint8_t funct3 = (instr >> 12) & 0x7;
+    uint8_t rd = (instr >> 7) & 0x1F;
+    uint8_t rs1 = (instr >> 15) & 0x1F;
+    uint8_t uimm = rs1 & 0x1F;
     uint64_t old, val;
 
     if (!csr_implemented(csr)) {
@@ -73,33 +76,37 @@ void exec_csr(uint32_t instr)
 
     int will_write = 0;
     switch (funct3) {
-        case 0x1: /* CSRRW */
-            will_write = 1;
-            val = (rs1 == 0) ? 0 : gpr[rs1];
-            break;
-        case 0x2: /* CSRRS */
-            will_write = (rs1 != 0);
-            if (rs1 != 0) val = gpr[rs1];
-            break;
-        case 0x3: /* CSRRC */
-            will_write = (rs1 != 0);
-            if (rs1 != 0) val = gpr[rs1];
-            break;
-        case 0x5: /* CSRRWI */
-            will_write = 1;
+    case 0x1: /* CSRRW */
+        will_write = 1;
+        val = (rs1 == 0) ? 0 : gpr[rs1];
+        break;
+    case 0x2: /* CSRRS */
+        will_write = (rs1 != 0);
+        if (rs1 != 0)
+            val = gpr[rs1];
+        break;
+    case 0x3: /* CSRRC */
+        will_write = (rs1 != 0);
+        if (rs1 != 0)
+            val = gpr[rs1];
+        break;
+    case 0x5: /* CSRRWI */
+        will_write = 1;
+        val = (uint64_t)uimm;
+        break;
+    case 0x6: /* CSRRSI */
+        will_write = (uimm != 0);
+        if (uimm != 0)
             val = (uint64_t)uimm;
-            break;
-        case 0x6: /* CSRRSI */
-            will_write = (uimm != 0);
-            if (uimm != 0) val = (uint64_t)uimm;
-            break;
-        case 0x7: /* CSRRCI */
-            will_write = (uimm != 0);
-            if (uimm != 0) val = (uint64_t)uimm;
-            break;
-        default:
-            emu_trap_illegal();
-            return;
+        break;
+    case 0x7: /* CSRRCI */
+        will_write = (uimm != 0);
+        if (uimm != 0)
+            val = (uint64_t)uimm;
+        break;
+    default:
+        emu_trap_illegal();
+        return;
     }
 
     if (will_write && !csr_writable(csr)) {
@@ -109,12 +116,24 @@ void exec_csr(uint32_t instr)
 
     if (will_write) {
         switch (funct3) {
-            case 0x1: csr_file[csr] = val; break;
-            case 0x2: csr_file[csr] = old | val; break;
-            case 0x3: csr_file[csr] = old & ~val; break;
-            case 0x5: csr_file[csr] = val; break;
-            case 0x6: csr_file[csr] = old | val; break;
-            case 0x7: csr_file[csr] = old & ~val; break;
+        case 0x1:
+            csr_file[csr] = val;
+            break;
+        case 0x2:
+            csr_file[csr] = old | val;
+            break;
+        case 0x3:
+            csr_file[csr] = old & ~val;
+            break;
+        case 0x5:
+            csr_file[csr] = val;
+            break;
+        case 0x6:
+            csr_file[csr] = old | val;
+            break;
+        case 0x7:
+            csr_file[csr] = old & ~val;
+            break;
         }
     }
 }
