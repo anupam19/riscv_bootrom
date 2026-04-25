@@ -17,7 +17,7 @@ void uart_putc(char c)
     volatile uint8_t *reg = uart_base;
     while (!(reg[5] & 0x20)) {
         /* Insert a pause hint to reduce power consumption and pipeline pressure during spin */
-        __asm__ volatile ("pause");
+         __asm__ volatile ("addi x0, x0, 1");
     }
     reg[0] = c; /* THR */
 
