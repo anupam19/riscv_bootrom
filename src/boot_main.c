@@ -109,6 +109,23 @@ void trap_handler(void)
     uart_put_hex64(mtval);
     uart_puts("\r\n");
 
+    /* Optional: Illegal register access detection for RV32E/RV64E
+       If the trap cause is illegal instruction, decode the faulting
+       instruction to see whether it referenced a register >= 16. */
+    if (mcause == 2) { /* CAUSE_ILLEGAL_INSTRUCTION */
+        uint32_t fault_instr = *(volatile uint32_t *)mepc;
+        uint32_t rs1 = (fault_instr >> 15) & 0x1F;
+        uint32_t rs2 = (fault_instr >> 20) & 0x1F;
+        uint32_t rd  = (fault_instr >> 11) & 0x1F;
+        if (rs1 >= 16 || rs2 >= 16 || rd >= 16) {
+            uart_puts("  Illegal register access: ");
+            if (rs1 >= 16) { uart_puts("rs1=x"); uart_put_hex8(rs1); uart_puts(" "); }
+            if (rs2 >= 16) { uart_puts("rs2=x"); uart_put_hex8(rs2); uart_puts(" "); }
+            if (rd  >= 16) { uart_puts("rd=x");  uart_put_hex8(rd);  uart_puts(" "); }
+            uart_puts("\r\n");
+        }
+    }
+
     while (1) {
         __asm__ volatile("wfi");
     }
