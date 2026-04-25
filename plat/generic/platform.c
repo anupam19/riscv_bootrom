@@ -15,7 +15,7 @@ __attribute__((weak)) void platform_init(void)
 #endif
 
 #ifdef ENABLE_PLIC_TEST
-    plic_init();                  /* Initialize PLIC and enable test source */
+    plic_init();                   /* Initialize PLIC and enable test source */
     csr_set(CSR_MIE, (1UL << 11)); /* MEIE — machine external interrupt enable */
 #endif
 }

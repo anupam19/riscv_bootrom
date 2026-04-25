@@ -7,10 +7,10 @@
 #define PLIC_BASE 0x0C000000UL /* PLIC base address */
 
 /* PLIC registers (per priority, pending, claim/complete) — simplified */
-#define PLIC_PENDING_OFFSET   0x0000UL /* 32-bit pending bits for each interrupt source */
-#define PLIC_ENABLE_OFFSET    0x0080UL /* Interrupt enable bits per hart/context */
-#define PLIC_PRIORITY_OFFSET  0x0100UL /* Priority thresholds and claims */
-#define PLIC_CLAIM_OFFSET     0x0200UL /* Claim/complete registers */
+#define PLIC_PENDING_OFFSET 0x0000UL  /* 32-bit pending bits for each interrupt source */
+#define PLIC_ENABLE_OFFSET 0x0080UL   /* Interrupt enable bits per hart/context */
+#define PLIC_PRIORITY_OFFSET 0x0100UL /* Priority thresholds and claims */
+#define PLIC_CLAIM_OFFSET 0x0200UL    /* Claim/complete registers */
 
 /* Number of interrupt sources supported (e.g., 32) */
 #define PLIC_NUM_SOURCES 32
