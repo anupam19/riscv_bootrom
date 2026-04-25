@@ -1,5 +1,8 @@
 #include "boot.h"
 #include "uart.h"
+#ifdef ENABLE_TIMER_TEST
+#include "timer.h"
+#endif
 
 /* Optional FENCE.I self-modifying code test.
    Compile with -DENABLE_FENCE_I_TEST to run.
@@ -171,6 +174,13 @@ void trap_handler(void)
             }
             uart_puts("\r\n");
         }
+    }
+#endif
+
+#ifdef ENABLE_TIMER_TEST
+    if (mcause == CAUSE_MACHINE_TIMER_INTERRUPT) {
+        /* Deassert timer interrupt by scheduling compare far future */
+        timer_set_compare(~0ULL);
     }
 #endif
 
