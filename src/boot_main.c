@@ -16,7 +16,7 @@ void boot_main(void)
 
     /* Jump to next stage (BL2 or bootloader)
        Address must be provided by platform or hardcoded */
-    void (*next_stage)(void) = (void (*)(void))0x80020000;
+    void (*next_stage)(void) = (void (*)(void)) 0x80020000;
     next_stage();
 
     /* In case jump fails, loop forever */

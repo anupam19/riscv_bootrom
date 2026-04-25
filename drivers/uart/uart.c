@@ -5,7 +5,7 @@
 #define UART_BASE_ADDR 0x10000000
 #endif
 
-volatile uint8_t *const uart_base = (volatile uint8_t *const)UART_BASE_ADDR;
+volatile uint8_t *const uart_base = (volatile uint8_t *)UART_BASE_ADDR;
 
 void uart_init(void)
 {
