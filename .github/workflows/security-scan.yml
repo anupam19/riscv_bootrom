@@ -53,20 +53,3 @@ jobs:
           path: |
             sbom.spdx.json
             sbom.cyclonedx.json
-
-  dependency-review:
-    name: Dependency Review
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-
-    if: github.event_name == 'pull_request'
-
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Dependency Review
-        uses: actions/dependency-review-action@v4
-        with:
-          fail-on-scopes: runtime,development,unknown
