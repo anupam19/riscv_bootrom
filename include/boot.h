@@ -58,6 +58,59 @@ static inline void csr_write(unsigned long csr, unsigned long val)
     __asm__ volatile("csrw %0, %1" : : "i"(csr), "r"(val));
 }
 
+/* CSR set: read-modify-write with OR (set bits) */
+static inline void csr_set(unsigned long csr, unsigned long mask)
+{
+    __asm__ volatile("csrs %0, %1" : : "i"(csr), "r"(mask));
+}
+
+/* CSR clear: read-modify-write with AND NOT (clear bits) */
+static inline void csr_clear(unsigned long csr, unsigned long mask)
+{
+    __asm__ volatile("csrc %0, %1" : : "i"(csr), "r"(mask));
+}
+
+/* Interrupt enable/disable (machine-level) */
+static inline void enable_irq(void)
+{
+    csr_set(CSR_MIE, 0xFFFFUL); /* Enable all standard machine interrupts */
+}
+
+static inline void disable_irq(void)
+{
+    csr_clear(CSR_MIE, 0xFFFFUL);
+}
+
+/* Set MTVEC to direct or vectored mode */
+/* mode=0: direct (BASE & ~3), mode=1: vectored (BASE & ~3, +4*exception) */
+static inline void set_mtvec(uintptr_t base, unsigned long mode)
+{
+    /* mode bit is bit 0 of the register value */
+    csr_write(CSR_MTVEC, base | (mode & 0x1));
+}
+
+/* Read/write mstatus (global interrupts enable, previous mode, etc.) */
+static inline unsigned long mstatus_read(void)
+{
+    return csr_read(CSR_MSTATUS);
+}
+
+static inline void mstatus_write(unsigned long val)
+{
+    csr_write(CSR_MSTATUS, val);
+}
+
+/* Set MIE (global interrupt enable) bit in mstatus (bit 3) */
+static inline void mstatus_irq_enable(void)
+{
+    csr_set(CSR_MSTATUS, (1UL << 3)); /* Set MIE */
+}
+
+static inline void mstatus_irq_disable(void)
+{
+    csr_clear(CSR_MSTATUS, (1UL << 3)); /* Clear MIE */
+}
+
 #ifndef ENABLE_UART_DEBUG
 #define ENABLE_UART_DEBUG 1
 #endif
