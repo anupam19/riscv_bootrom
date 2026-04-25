@@ -22,18 +22,17 @@ void boot_main(void)
     /* Target address (configurable) */
     uintptr_t target = 0x80020000UL;
 
-    /* Load target address into x10 using LUI+ADDI, then jump via JALR
-       - lui x10, imm[31:12]   (upper 20 bits)
-       - addi x10, x10, imm[11:0] (sign-extended lower 12 bits)
-       - jalr x0, x10, 0       (jump, no link) */
-    __asm__ volatile (
+     /* Load target address into x10 using LUI+ADDI, then jump via JALR
+        - lui x10, imm[31:12]   (upper 20 bits)
+        - addi x10, x10, imm[11:0] (sign-extended lower 12 bits)
+        - jalr x0, x10, 0       (jump, no link) */
+    __asm__ volatile(
         "lui x10, %0\n\t"
         "addi x10, x10, %1\n\t"
         "jalr x0, x10, 0"
         :
         : "i" (target >> 12), "i" (target & 0xFFF)
-        : "x10", "memory"
-    );
+        : "x10", "memory");
 
     /* Should not reach here */
     while (1) {
