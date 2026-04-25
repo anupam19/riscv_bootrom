@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'release-*'
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-release-artifacts:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: riscv64-linux-gnu
+            prefix: riscv64-linux-gnu-
+            pkg: gcc-riscv64-linux-gnu
+          - os: ubuntu-latest
+            target: riscv64-unknown-elf
+            prefix: riscv64-unknown-elf-
+            pkg: gcc-riscv64-linux-gnu  # use linux-gnu as fallback; sufficient for freestanding
+          - os: macOS-latest
+            target: riscv64-unknown-elf
+            prefix: riscv64-unknown-elf-
+            brew: riscv-tools
+
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install RISC-V toolchain (${{ matrix.target }})
+        run: |
+          if [ "${{ matrix.os }}" = "ubuntu-latest" ]; then
+            sudo apt-get update
+            sudo apt-get install -y ${{ matrix.pkg }} binutils-riscv64-linux-gnu
+          elif [ "${{ matrix.os }}" = "macOS-latest" ]; then
+            brew install ${{ matrix.brew }}
+          fi
+
+      - name: Build BootROM (${{ matrix.target }})
+        run: |
+          make clean
+          make TOOLCHAIN_PREFIX=${{ matrix.prefix }}
+
+      - name: Package artifacts
+        run: |
+          mkdir -p dist
+          cp build/bootrom.elf build/bootrom.bin dist/
+          echo "Built for ${{ matrix.target }}" > dist/INFO.txt
+
+          if [[ "${{ matrix.os }}" == "macOS" ]]; then
+            tar -czf "bootrom-${{ matrix.target }}-macos.tar.gz" -C dist .
+          else
+            tar -czf "bootrom-${{ matrix.target }}-linux.tar.gz" -C dist .
+          fi
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ matrix.target }}-${{ matrix.os }}
+          path: |
+            bootrom-*.tar.gz
+          if-no-files-found: error
+
+  create-github-release:
+    name: Create GitHub Release
+    needs: build-release-artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+
+      - name: Create or Update Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |
+            artifacts/release-*/bootrom-*.tar.gz
+          generate_release_notes: true
+          draft: false
+          fail_on_unmatched_files: false

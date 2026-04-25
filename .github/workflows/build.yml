@@ -1,0 +1,102 @@
+name: Build
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-riscv64:
+    name: RISC-V 64-bit Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install RISC-V Linux toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
+
+      - name: Build BootROM
+        run: |
+          make clean
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+
+      - name: Check build artifacts
+        run: |
+          test -f build/bootrom.elf || { echo "ELF missing!"; exit 1; }
+          test -f build/bootrom.bin || { echo "BIN missing!"; exit 1; }
+          echo "Build artifacts present"
+
+      - name: Upload ELF artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootrom-elf
+          path: build/bootrom.elf
+          if-no-files-found: error
+
+      - name: Upload BIN artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootrom-bin
+          path: build/bootrom.bin
+          if-no-files-found: error
+
+  check-no-binaries:
+    name: No Binary Artifacts in Repo
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check for committed binaries
+        run: |
+          found=0
+          for pattern in "*.o" "*.elf" "*.bin" "*.a" "*.so" "*.out"; do
+            files=$(find . -name "$pattern" -not -path "./.git/*" -not -path "./build/*" 2>/dev/null)
+            if [ -n "$files" ]; then
+              echo "ERROR: Found binary: $files"
+              found=1
+            fi
+          done
+          if [ "$found" -eq 1 ]; then
+            exit 1
+          fi
+          echo "No binary artifacts in repository - OK"
+
+  no-bloat-check:
+    name: Size Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install RISC-V Linux toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-linux-gnu
+
+      - name: Build and check size
+        run: |
+          make clean
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+          size=$(wc -c < build/bootrom.bin)
+          echo "BootROM size: $size bytes"
+          # Fail if larger than expected (e.g., 8KB for small BootROM)
+          if [ "$size" -gt 8192 ]; then
+            echo "ERROR: BootROM exceeds 8KB limit"
+            exit 1
+          fi
+          echo "Size within limit - OK"

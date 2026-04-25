@@ -1,0 +1,75 @@
+name: Multi-Platform Builds
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-macos:
+    name: Build (macOS)
+    runs-on: macos-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install RISC-V toolchain via Homebrew
+        run: |
+          brew install riscv-tools
+
+      - name: Build BootROM
+        run: |
+          make clean
+          make TOOLCHAIN_PREFIX=riscv64-unknown-elf-
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootrom-macos
+          path: build/bootrom.bin
+          if-no-files-found: error
+
+  build-windows:
+    name: Build (Windows)
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup MSYS2 + RISC-V toolchain
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: >-
+            mingw-w64-x86_64-gcc
+          update: true
+
+      - name: Download RISC-V toolchain
+        run: |
+          # Download pre-built RISC-V GNU toolchain for Windows
+          Invoke-WebRequest -Uri "https://github.com/riscv-collab/riscv-gnu-toolchain/releases/download/2024.06.20/riscv64-unknown-elf-gcc-14.2.0-mingw-w64-i686-win32.zip" -OutFile "riscv-toolchain.zip"
+          Expand-Archive -Path "riscv-toolchain.zip" -DestinationPath "C:\riscv-toolchain"
+          echo "C:\riscv-toolchain\bin" >> $env:GITHUB_PATH
+
+      - name: Build BootROM (Windows)
+        shell: bash
+        run: |
+          # Toolchain downloaded already, ensure PATH includes it
+          export PATH="C:\riscv-toolchain\bin:$PATH"
+          make clean
+          make TOOLCHAIN_PREFIX=riscv64-unknown-elf-
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootrom-windows
+          path: build/bootrom.bin
+          if-no-files-found: error

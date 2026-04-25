@@ -1,0 +1,84 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  formatting:
+    name: Code Formatting Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format
+
+      - name: Check C code formatting
+        run: |
+          echo "Checking formatting for all C files..."
+          find src include plat drivers -name "*.c" -o -name "*.h" | \
+          sort -z | \
+          xargs -0 -r clang-format --dry-run --Werror -style=file \
+          || { echo "::error::Code formatting issues found. Run 'find src include plat drivers -name "*.c" -o -name "*.h" | xargs clang-format -i' to fix."; exit 1; }
+          echo "All files properly formatted"
+
+  lint-cppcheck:
+    name: Static Analysis (cppcheck)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck
+        run: |
+          cppcheck \
+            --enable=all \
+            --inconclusive \
+            --std=c11 \
+            --suppress=missingIncludeSystem \
+            --suppress=unusedFunction \
+            --suppress=missingInclude \
+            --suppress=constParameter \
+            --suppress=variableScope \
+            --suppress=uninitVar \
+            --suppress=unknownMacros \
+            --error-exitcode=0 \
+            src/ include/ plat/ drivers/ \
+            || echo "::warning::cppcheck found potential issues"
+
+  lint-shellcheck:
+    name: Shell Script Linting
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Check all shell scripts
+        run: |
+          find . -name "*.sh" -not -path "./.git/*" -exec shellcheck {} \; \
+          || echo "Shell script issues found (non-blocking)"

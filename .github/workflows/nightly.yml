@@ -1,0 +1,60 @@
+name: Nightly Builds
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build-default:
+    name: Default Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install RISC-V toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
+
+      - name: Build (default config)
+        run: |
+          make clean
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: nightly-default
+          path: build/bootrom.bin
+
+  build-no-uart:
+    name: Build (UART disabled)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install RISC-V toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
+
+      - name: Build (UART disabled)
+        run: |
+          make clean
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu- CFLAGS="-DENABLE_UART_DEBUG=0 -ffreestanding -nostdlib -march=rv64imac -mabi=lp64 -O2 -Wall -Wextra -Iinclude -Iplat/generic"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: nightly-no-uart
+          path: build/bootrom.bin

@@ -1,0 +1,67 @@
+name: Static Analysis
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  semgrep:
+    name: Semgrep Security & Code Quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          # Core security & quality rules
+          config: >-
+            p/security-audit
+            p/secrets
+            p/cwe-top-25
+            p/best-practices
+          # Generate SARIF for GitHub Code Scanning
+          generateSarif: "1"
+
+      - name: Upload Semgrep SARIF
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
+        with:
+          sarif_file: semgrep.sarif
+
+  cppcheck-extra:
+    name: Extra Static Checks (cppcheck)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck (strict)
+        run: |
+          cppcheck \
+            --enable=warning,performance,style \
+            --inline-suppr \
+            --std=c11 \
+            --suppress=missingIncludeSystem \
+            --suppress=unusedFunction \
+            --suppress=missingInclude \
+            --suppress=unmatchedSuppression \
+            src/ include/ plat/ drivers/ \
+            || echo "::warning::cppcheck found issues (see above)"
