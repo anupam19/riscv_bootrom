@@ -175,7 +175,34 @@ static inline void guarded_sw(volatile uint32_t *addr, uint64_t val)
             __asm__ volatile("wfi");
         }
     }
-    *(volatile uint32_t *)addr = (uint32_t)val; /* truncate to 32 bits */
+    *(volatile uint32_t *)addr = (uint32_t)val; /* truncate */
 }
+
+/* RV64: guarded doubleword (64‑bit) load/store */
+#if __riscv_xlen == 64
+static inline uint64_t guarded_ld(volatile uint64_t *addr)
+{
+    if ((uintptr_t)addr & 0x7) {
+        uart_puts("Misaligned doubleword load at 0x");
+        uart_put_hex64((uintptr_t)addr);
+        while (1) {
+            __asm__ volatile("wfi");
+        }
+    }
+    return *(volatile uint64_t *)addr;
+}
+
+static inline void guarded_sd(volatile uint64_t *addr, uint64_t val)
+{
+    if ((uintptr_t)addr & 0x7) {
+        uart_puts("Misaligned doubleword store at 0x");
+        uart_put_hex64((uintptr_t)addr);
+        while (1) {
+            __asm__ volatile("wfi");
+        }
+    }
+    *(volatile uint64_t *)addr = val;
+}
+#endif /* __riscv_xlen == 64 */
 
 #endif /* BOOT_H */

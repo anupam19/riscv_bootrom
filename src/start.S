@@ -16,20 +16,20 @@ _start:
      la t0, __bss_start
      la t1, __bss_end
      beq t0, t1, 2f
- 1:
+  1:
      sd zero, 0(t0)
      addi t0, t0, 8
      blt t0, t1, 1b
- 2:
+  2:
 #else
      la t0, __bss_start
      la t1, __bss_end
      beq t0, t1, 2f
- 1:
+  1:
      sw zero, 0(t0)
      addi t0, t0, 4
      blt t0, t1, 1b
- 2:
+  2:
 #endif
 
     /* Install trap handler (direct mode) */
@@ -55,15 +55,14 @@ _start:
     .globl trap_entry
     .type trap_entry, @function
  trap_entry:
-     /* Minimal stack frame for ABI compliance (if we call C) */
-     addi sp, sp, -16
--#if __riscv_xlen == 64
-+    /* Save return address (64-bit on RV64, 32-bit on RV32) */
-+#if __riscv_xlen == 64
-     sd ra, 8(sp)          /* Save return address (for debugging) */
- #else
-     sw ra, 8(sp)          /* Save return address (for debugging) */
- #endif
+    /* Minimal stack frame for ABI compliance (if we call C) */
+    addi sp, sp, -16
+    /* Save return address (64-bit on RV64, 32-bit on RV32) */
+#if __riscv_xlen == 64
+    sd ra, 8(sp)          /* Save return address (for debugging) */
+#else
+    sw ra, 8(sp)          /* Save return address (for debugging) */
+#endif
 
     /* Call C trap handler */
     jal ra, trap_handler
