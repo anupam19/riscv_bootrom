@@ -5,11 +5,11 @@ LD := $(TOOLCHAIN_PREFIX)ld
 OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
 SIZE := $(TOOLCHAIN_PREFIX)size
 
-CFLAGS := -ffreestanding -nostdlib -march=rv64imac -mabi=lp64 \
+CFLAGS := -ffreestanding -nostdlib -march=rv64imac_zicsr -mabi=lp64 \
           -O2 -Wall -Wextra \
           -Iinclude -I$(abspath plat/generic)
 
-ASFLAGS := -march=rv64imac -mabi=lp64
+ASFLAGS := -march=rv64imac_zicsr -mabi=lp64
 
 LDFLAGS := -T linker.ld -nostdlib
 
