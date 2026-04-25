@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "uart.h"
+
 void boot_main(void) __attribute__((noreturn));
 void trap_handler(void) __attribute__((noreturn));
 void platform_init(void);
@@ -114,5 +116,64 @@ static inline void mstatus_irq_disable(void)
 #ifndef ENABLE_UART_DEBUG
 #define ENABLE_UART_DEBUG 1
 #endif
+
+/* Misaligned access guard functions */
+static inline uint8_t guarded_lb(volatile uint8_t *addr)
+{
+    return *addr;
+}
+
+static inline uint16_t guarded_lh(volatile uint16_t *addr)
+{
+    if ((uintptr_t)addr & 0x1) {
+        uart_puts("Misaligned halfword load at 0x");
+        uart_put_hex64((uintptr_t)addr);
+        while (1) {
+            __asm__ volatile("wfi");
+        }
+    }
+    return *(volatile uint16_t *)addr;
+}
+
+static inline uint32_t guarded_lw(volatile uint32_t *addr)
+{
+    if ((uintptr_t)addr & 0x3) {
+        uart_puts("Misaligned word load at 0x");
+        uart_put_hex64((uintptr_t)addr);
+        while (1) {
+            __asm__ volatile("wfi");
+        }
+    }
+    return *(volatile uint32_t *)addr;
+}
+
+static inline void guarded_sb(volatile uint8_t *addr, uint8_t val)
+{
+    *addr = val;
+}
+
+static inline void guarded_sh(volatile uint16_t *addr, uint16_t val)
+{
+    if ((uintptr_t)addr & 0x1) {
+        uart_puts("Misaligned halfword store at 0x");
+        uart_put_hex64((uintptr_t)addr);
+        while (1) {
+            __asm__ volatile("wfi");
+        }
+    }
+    *(volatile uint16_t *)addr = val;
+}
+
+static inline void guarded_sw(volatile uint32_t *addr, uint32_t val)
+{
+    if ((uintptr_t)addr & 0x3) {
+        uart_puts("Misaligned word store at 0x");
+        uart_put_hex64((uintptr_t)addr);
+        while (1) {
+            __asm__ volatile("wfi");
+        }
+    }
+    *(volatile uint32_t *)addr = val;
+}
 
 #endif /* BOOT_H */
