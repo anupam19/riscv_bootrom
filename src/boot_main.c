@@ -14,11 +14,19 @@ void boot_main(void)
     uart_puts("BootROM: Jumping to next stage\n");
 #endif
 
-    /* Jump to next stage (BL2 or bootloader) */
-    void (*next_stage)(void) = (void (*)(void))0x80020000;
-    next_stage();
+    /* Jump to next stage using full 32-bit address construction
+       (LUI + ADDI + JALR). This demonstrates PIC-style jump
+       without using a direct function call. */
 
-    /* Should not reach here */
+    uintptr_t target = 0x80020000UL;
+
+    __asm__ volatile("lui x10, %0\n\t"
+                     "addi x10, x10, %1\n\t"
+                     "jalr x0, x10, 0"
+                     :
+                     : "i"(target >> 12), "i"(target & 0xFFF)
+                     : "x10", "memory");
+
     while (1) {
         __asm__ volatile("wfi");
     }
@@ -33,7 +41,6 @@ void trap_handler(void)
     const char *cause_str;
 
     if (mcause & (1UL << 31)) {
-        /* Interrupt */
         switch (mcause & 0xFF) {
         case 0x01:
             cause_str = "Machine Timer";
@@ -49,7 +56,6 @@ void trap_handler(void)
             break;
         }
     } else {
-        /* Exception */
         switch (mcause & 0xFF) {
         case 0x00:
             cause_str = "Instruction misaligned";
