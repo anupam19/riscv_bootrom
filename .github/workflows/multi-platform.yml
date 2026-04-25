@@ -21,6 +21,7 @@ jobs:
 
       - name: Install RISC-V GNU toolchain via Homebrew
         run: |
+          brew update
           brew tap riscv-software-src/riscv-gnu-toolchain
           brew install riscv64-unknown-elf-gcc
 
