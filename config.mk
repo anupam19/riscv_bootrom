@@ -16,7 +16,7 @@ endif
 
 CFLAGS := -ffreestanding -nostdlib -march=$(MARCH) -mabi=$(MABI) \
           -O2 -Wall -Wextra \
-          -Iinclude -I$(abspath plat/generic)
+          -Iinclude -Idrivers/timer -I$(abspath plat/generic)
 
 ASFLAGS := -march=$(MARCH) -mabi=$(MABI)
 
