@@ -4,7 +4,7 @@
 
 /* Timer tick frequency — CLINT runs at CPU frequency; approximate 1 MHz for simplicity.
    In real hardware, this would be the CPU clock (e.g., 32 MHz). */
-#define TIMER_TICK_HZ 1000000UL  /* 1 MHz */
+#define TIMER_TICK_HZ 1000000UL /* 1 MHz */
 
 void timer_init(uint64_t usec)
 {

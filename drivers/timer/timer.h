@@ -7,7 +7,7 @@
 #define CLINT_BASE 0x02000000UL
 
 /* Offsets within CLINT */
-#define CLINT_MTIME_OFFSET   0x0000UL  /* read‑only 64‑bit time register */
+#define CLINT_MTIME_OFFSET 0x0000UL    /* read‑only 64‑bit time register */
 #define CLINT_MTIMECMP_OFFSET 0x4000UL /* per‑hart compare register (64‑bit) */
 
 /* Accessors — volatile for MMIO */
