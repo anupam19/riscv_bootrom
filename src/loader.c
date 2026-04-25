@@ -6,7 +6,7 @@
 #define LOAD_ADDR 0x80020000UL
 
 /* Size of the image to load (bytes) — must match the built image size */
-#define IMAGE_MAX_SIZE 0x40000UL  /* 256 KB */
+#define IMAGE_MAX_SIZE 0x40000UL /* 256 KB */
 
 void load_and_jump(void)
 {
