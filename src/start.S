@@ -30,7 +30,7 @@ _start:
     csrw mie, t0
 
     /* Jump to C entry point */
-    call boot_main
+    jal ra, boot_main
 
     /* Should never return — infinite loop */
 3:
@@ -49,7 +49,7 @@ trap_entry:
     sw ra, 8(sp)          /* Save return address (for debugging) */
 
     /* Call C trap handler */
-    call trap_handler
+    jal ra, trap_handler
 
     /* trap_handler should not return, but safe infinite loop */
 4:
