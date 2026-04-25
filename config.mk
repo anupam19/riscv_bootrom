@@ -9,6 +9,11 @@ SIZE := $(TOOLCHAIN_PREFIX)size
 MARCH ?= rv64imac_zicsr
 MABI  ?= lp64
 
+# If building for RV32E/RV64E (MARCH contains 'e'), enable extra diagnostics
+ifneq (,$(findstring e,$(MARCH)))
+    CFLAGS += -DRV_E
+endif
+
 CFLAGS := -ffreestanding -nostdlib -march=$(MARCH) -mabi=$(MABI) \
           -O2 -Wall -Wextra \
           -Iinclude -I$(abspath plat/generic)

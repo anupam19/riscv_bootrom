@@ -118,12 +118,12 @@ static inline void mstatus_irq_disable(void)
 #endif
 
 /* Misaligned access guard functions */
-static inline uint8_t guarded_lb(volatile uint8_t *addr)
+static inline uint64_t guarded_lb(volatile uint8_t *addr)
 {
-    return *addr;
+    return (uint64_t)(int8_t)(*addr); /* sign-extended byte */
 }
 
-static inline uint16_t guarded_lh(volatile uint16_t *addr)
+static inline uint64_t guarded_lh(volatile uint16_t *addr)
 {
     if ((uintptr_t)addr & 0x1) {
         uart_puts("Misaligned halfword load at 0x");
@@ -132,10 +132,11 @@ static inline uint16_t guarded_lh(volatile uint16_t *addr)
             __asm__ volatile("wfi");
         }
     }
-    return *(volatile uint16_t *)addr;
+    uint16_t val = *(volatile uint16_t *)addr;
+    return (uint64_t)(int16_t)val; /* sign-extend */
 }
 
-static inline uint32_t guarded_lw(volatile uint32_t *addr)
+static inline uint64_t guarded_lw(volatile uint32_t *addr)
 {
     if ((uintptr_t)addr & 0x3) {
         uart_puts("Misaligned word load at 0x");
@@ -144,15 +145,16 @@ static inline uint32_t guarded_lw(volatile uint32_t *addr)
             __asm__ volatile("wfi");
         }
     }
-    return *(volatile uint32_t *)addr;
+    uint32_t val = *(volatile uint32_t *)addr;
+    return (uint64_t)(int32_t)val; /* sign-extend to 64-bit */
 }
 
-static inline void guarded_sb(volatile uint8_t *addr, uint8_t val)
+static inline void guarded_sb(volatile uint8_t *addr, uint64_t val)
 {
-    *addr = val;
+    *addr = (uint8_t)val;
 }
 
-static inline void guarded_sh(volatile uint16_t *addr, uint16_t val)
+static inline void guarded_sh(volatile uint16_t *addr, uint64_t val)
 {
     if ((uintptr_t)addr & 0x1) {
         uart_puts("Misaligned halfword store at 0x");
@@ -161,10 +163,10 @@ static inline void guarded_sh(volatile uint16_t *addr, uint16_t val)
             __asm__ volatile("wfi");
         }
     }
-    *(volatile uint16_t *)addr = val;
+    *(volatile uint16_t *)addr = (uint16_t)val;
 }
 
-static inline void guarded_sw(volatile uint32_t *addr, uint32_t val)
+static inline void guarded_sw(volatile uint32_t *addr, uint64_t val)
 {
     if ((uintptr_t)addr & 0x3) {
         uart_puts("Misaligned word store at 0x");
@@ -173,7 +175,34 @@ static inline void guarded_sw(volatile uint32_t *addr, uint32_t val)
             __asm__ volatile("wfi");
         }
     }
-    *(volatile uint32_t *)addr = val;
+    *(volatile uint32_t *)addr = (uint32_t)val; /* truncate */
 }
+
+/* RV64: guarded doubleword (64‑bit) load/store */
+#if __riscv_xlen == 64
+static inline uint64_t guarded_ld(volatile uint64_t *addr)
+{
+    if ((uintptr_t)addr & 0x7) {
+        uart_puts("Misaligned doubleword load at 0x");
+        uart_put_hex64((uintptr_t)addr);
+        while (1) {
+            __asm__ volatile("wfi");
+        }
+    }
+    return *(volatile uint64_t *)addr;
+}
+
+static inline void guarded_sd(volatile uint64_t *addr, uint64_t val)
+{
+    if ((uintptr_t)addr & 0x7) {
+        uart_puts("Misaligned doubleword store at 0x");
+        uart_put_hex64((uintptr_t)addr);
+        while (1) {
+            __asm__ volatile("wfi");
+        }
+    }
+    *(volatile uint64_t *)addr = val;
+}
+#endif /* __riscv_xlen == 64 */
 
 #endif /* BOOT_H */
