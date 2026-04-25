@@ -3,6 +3,9 @@
 #ifdef ENABLE_TIMER_TEST
 #include "timer.h"
 #endif
+#ifdef ENABLE_PLIC_TEST
+#include "plic.h"
+#endif
 
 /* Optional FENCE.I self-modifying code test.
    Compile with -DENABLE_FENCE_I_TEST to run.
@@ -181,6 +184,19 @@ void trap_handler(void)
     if (mcause == CAUSE_MACHINE_TIMER_INTERRUPT) {
         /* Deassert timer interrupt by scheduling compare far future */
         timer_set_compare(~0ULL);
+    }
+#endif
+
+#ifdef ENABLE_PLIC_TEST
+    if (mcause == CAUSE_MACHINE_EXTERNAL_INTERRUPT) {
+        uint32_t source = plic_claim();
+        if (source != 0) {
+            uart_puts("\r\nExternal interrupt from source ");
+            uart_put_hex32(source);
+            uart_puts("\r\n");
+            /* Acknowledge completion */
+            plic_complete(source);
+        }
     }
 #endif
 
