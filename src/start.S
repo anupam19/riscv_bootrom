@@ -8,6 +8,9 @@ _start:
     la sp, _stack_top
     .option pop
 
+    /* Enforce 16-byte stack alignment per ABI (round down) */
+    andi sp, sp, -16
+
     /* Zero .bss section */
     la t0, __bss_start
     la t1, __bss_end
