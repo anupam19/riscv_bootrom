@@ -16,9 +16,13 @@ void uart_putc(char c)
 {
     volatile uint8_t *reg = uart_base;
     while (!(reg[5] & 0x20)) {
-        ;
+        /* Insert a pause hint to reduce power consumption and pipeline pressure during spin */
+        __asm__ volatile ("pause");
     }
-    reg[0] = c;
+    reg[0] = c; /* THR */
+
+    /* Ensure write completes before continuing (MMIO ordering) */
+    __asm__ volatile ("fence w, w" ::: "memory");
 }
 
 void uart_puts(const char *s)
