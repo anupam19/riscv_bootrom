@@ -69,4 +69,4 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          fail-on-scopes: production,development,direct
+          fail-on-scopes: runtime,development,unknown
