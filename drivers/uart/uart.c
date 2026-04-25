@@ -5,7 +5,7 @@
 #define UART_BASE_ADDR 0x10000000
 #endif
 
-volatile uint8_t* const uart_base = (volatile uint8_t* const)UART_BASE_ADDR;
+volatile uint8_t *const uart_base = (volatile uint8_t *)UART_BASE_ADDR;
 
 void uart_init(void)
 {
@@ -19,16 +19,19 @@ void uart_init(void)
 void uart_putc(char c)
 {
     volatile uint8_t *reg = uart_base;
-    while (!(reg[5] & 0x20))   /* LSR[5] = THRE (Transmitter Holding Register Empty) */
+    /* Wait for THR empty (LSR[5]) */
+    while (!(reg[5] & 0x20)) {
         ;
-    reg[0] = c;                /* THR */
+    }
+    reg[0] = c; /* THR */
 }
 
 void uart_puts(const char *s)
 {
     while (*s) {
-        if (*s == '\n')
+        if (*s == '\n') {
             uart_putc('\r');
+        }
         uart_putc(*s++);
     }
 }

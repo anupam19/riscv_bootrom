@@ -1,0 +1,49 @@
+name: Cross-Compilation
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  riscv64-linux:
+    name: RISC-V Linux Toolchain Build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    continue-on-error: false
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install RISC-V Linux toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
+
+      - name: Build BootROM
+        run: |
+          make clean
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+
+      - name: Verify artifacts
+        run: |
+          test -f build/bootrom.elf
+          test -f build/bootrom.bin
+          ls -lh build/
+
+      - name: Upload ELF
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootrom-riscv64-linux-elf
+          path: build/bootrom.elf
+
+      - name: Upload BIN
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootrom-riscv64-linux-bin
+          path: build/bootrom.bin

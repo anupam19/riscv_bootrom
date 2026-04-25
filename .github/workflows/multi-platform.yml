@@ -1,0 +1,43 @@
+name: Multi-Platform Sanity Check
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  ubuntu-riscv64:
+    name: RISC-V Build (Ubuntu)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install RISC-V Linux toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
+
+      - name: Build BootROM
+        run: |
+          make clean
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+
+      - name: Verify output
+        run: |
+          test -s build/bootrom.elf
+          test -s build/bootrom.bin
+          wc -c < build/bootrom.bin
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootrom-riscv64-ubuntu
+          path: build/bootrom.bin
+          if-no-files-found: error

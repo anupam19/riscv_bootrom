@@ -3,13 +3,11 @@
 
 void boot_main(void)
 {
-    /* Optional UART debug output */
 #if ENABLE_UART_DEBUG
     uart_init();
     uart_puts("BootROM: Starting...\n");
 #endif
 
-    /* Platform-specific initialization (empty for generic) */
     platform_init();
 
 #if ENABLE_UART_DEBUG
@@ -23,6 +21,6 @@ void boot_main(void)
 
     /* In case jump fails, loop forever */
     while (1) {
-        __asm__ volatile ("wfi");
+        __asm__ volatile("wfi");
     }
 }

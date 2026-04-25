@@ -1,4 +1,4 @@
-TOOLCHAIN_PREFIX := riscv64-unknown-elf-
+TOOLCHAIN_PREFIX ?= riscv64-unknown-elf-
 CC := $(TOOLCHAIN_PREFIX)gcc
 AS := $(TOOLCHAIN_PREFIX)gcc
 LD := $(TOOLCHAIN_PREFIX)ld
