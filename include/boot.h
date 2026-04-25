@@ -148,82 +148,9 @@ static inline uint64_t csr_csrrci(uint16_t csr, uint8_t uimm)
 }
 
 /* Emulator core function: execute one CSR instruction (software model) */
+#ifdef EMULATOR
 void exec_csr(uint32_t instr);
-
-/* Zicsr: atomic read-modify-write CSR instructions (return previous value) */
-
-/* CSRRW — atomic swap: old = CSR; CSR = rs1; return old */
-static inline uint64_t csr_csrrw(uint16_t csr, uint64_t val)
-{
-    uint64_t old;
-    __asm__ volatile("csrrw %0, %1, %2" : "=r"(old) : "i"(csr), "r"(val));
-    return old;
-}
-
-/* CSRRS — atomic set: old = CSR; CSR = old | rs1; return old.
-   Special: if rs1 == 0 → read only, no write (use x0 source). */
-static inline uint64_t csr_csrrs(uint16_t csr, uint64_t mask)
-{
-    uint64_t old;
-    if (mask == 0) {
-        __asm__ volatile("csrrs %0, %1, x0" : "=r"(old) : "i"(csr));
-    } else {
-        __asm__ volatile("csrrs %0, %1, %2" : "=r"(old) : "i"(csr), "r"(mask));
-    }
-    return old;
-}
-
-/* CSRRC — atomic clear: old = CSR; CSR = old & ~rs1; return old.
-   Special: if rs1 == 0 → read only, no write. */
-static inline uint64_t csr_csrrc(uint16_t csr, uint64_t mask)
-{
-    uint64_t old;
-    if (mask == 0) {
-        __asm__ volatile("csrrc %0, %1, x0" : "=r"(old) : "i"(csr));
-    } else {
-        __asm__ volatile("csrrc %0, %1, %2" : "=r"(old) : "i"(csr), "r"(mask));
-    }
-    return old;
-}
-
-/* Immediate variants (5-bit zero-extended immediate) */
-
-/* CSRRWI — write zero-extended immediate, return old */
-static inline uint64_t csr_csrrwi(uint16_t csr, uint8_t uimm)
-{
-    uint64_t old;
-    __asm__ volatile("csrrwi %0, %1, %2" : "=r"(old) : "i"(csr), "i"(uimm));
-    return old;
-}
-
-/* CSRRSI — atomic set with immediate, return old.
-   Special: if uimm == 0 → read only. */
-static inline uint64_t csr_csrrsi(uint16_t csr, uint8_t uimm)
-{
-    uint64_t old;
-    if (uimm == 0) {
-        __asm__ volatile("csrrs %0, %1, x0" : "=r"(old) : "i"(csr));
-    } else {
-        __asm__ volatile("csrrsi %0, %1, %2" : "=r"(old) : "i"(csr), "i"(uimm));
-    }
-    return old;
-}
-
-/* CSRRCI — atomic clear with immediate, return old.
-   Special: if uimm == 0 → read only. */
-static inline uint64_t csr_csrrci(uint16_t csr, uint8_t uimm)
-{
-    uint64_t old;
-    if (uimm == 0) {
-        __asm__ volatile("csrrc %0, %1, x0" : "=r"(old) : "i"(csr));
-    } else {
-        __asm__ volatile("csrrci %0, %1, %2" : "=r"(old) : "i"(csr), "i"(uimm));
-    }
-    return old;
-}
-
-/* Emulator core function: execute one CSR instruction (software model) */
-void exec_csr(uint32_t instr);
+#endif
 
 /* Interrupt enable/disable (machine-level) */
 static inline void enable_irq(void)
