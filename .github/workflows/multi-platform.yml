@@ -1,4 +1,4 @@
-name: Multi-Platform Builds
+name: Multi-Platform Sanity Check
 
 on:
   push:
@@ -10,29 +10,34 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build-macos:
-    name: Build (macOS)
-    runs-on: macos-latest
+  ubuntu-riscv64:
+    name: RISC-V Build (Ubuntu)
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install RISC-V GNU toolchain via Homebrew
+      - name: Install RISC-V Linux toolchain
         run: |
-          brew update
-          brew tap riscv-software-src/riscv-gnu-toolchain
-          brew install riscv64-unknown-elf-gcc
+          sudo apt-get update
+          sudo apt-get install -y gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
 
       - name: Build BootROM
         run: |
           make clean
-          make TOOLCHAIN_PREFIX=riscv64-unknown-elf-
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu-
 
-      - name: Upload artifact
+      - name: Verify output
+        run: |
+          test -s build/bootrom.elf
+          test -s build/bootrom.bin
+          wc -c < build/bootrom.bin
+
+      - name: Upload binary artifact
         uses: actions/upload-artifact@v7
         with:
-          name: bootrom-macos
+          name: bootrom-riscv64-ubuntu
           path: build/bootrom.bin
           if-no-files-found: error
