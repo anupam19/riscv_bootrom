@@ -14,9 +14,26 @@ void boot_main(void)
     uart_puts("BootROM: Jumping to next stage\n");
 #endif
 
-    /* Jump to next stage (BL2 or bootloader) */
-    void (*next_stage)(void) = (void (*)(void))0x80020000;
-    next_stage();
+    /* Jump to next stage using full 32-bit address construction
+       (LUI + ADDI + JALR). This demonstrates PIC-style jump
+       without using a direct function call (which would require
+       relocatable addresses or absolute jumps limited by JAL range). */
+
+    /* Target address (configurable) */
+    uintptr_t target = 0x80020000UL;
+
+    /* Load target address into x10 using LUI+ADDI, then jump via JALR
+       - lui x10, imm[31:12]   (upper 20 bits)
+       - addi x10, x10, imm[11:0] (sign-extended lower 12 bits)
+       - jalr x0, x10, 0       (jump, no link) */
+    __asm__ volatile (
+        "lui x10, %0\n\t"
+        "addi x10, x10, %1\n\t"
+        "jalr x0, x10, 0"
+        :
+        : "i" (target >> 12), "i" (target & 0xFFF)
+        : "x10", "memory"
+    );
 
     /* Should not reach here */
     while (1) {
