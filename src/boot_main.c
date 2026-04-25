@@ -25,7 +25,7 @@ void boot_main(void)
         "addi x10, x10, %1\n\t"
         "jalr x0, x10, 0"
         :
-        : "i" (target >> 12), "i" (target & 0xFFF)
+        : "i"(target >> 12), "i"(target & 0xFFF)
         : "x10", "memory");
 
     while (1) {
