@@ -28,6 +28,9 @@ jobs:
         run: |
           make TOOLCHAIN_PREFIX=riscv64-linux-gnu-
           ls -la build/
+          riscv64-linux-gnu-objdump -d build/bootrom.elf > bootrom.disasm
+          echo "===== Disassembly of boot_main ====="
+          grep -A20 "<boot_main>:" -m20 bootrom.disasm || true
 
       - name: Build test payload
         run: |
