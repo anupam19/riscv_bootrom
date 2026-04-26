@@ -5,9 +5,8 @@ _start:
     # UART base: 0x10000000
     lui t0, 0x10000          # t0 = 0x10000000
 
-    # Load string address (absolute)
-    lui t1, %hi(string)
-    addi t1, t1, %lo(string)
+    # Load string address
+    la t1, string
 
 print_loop:
     lbu t2, 0(t1)
@@ -26,17 +25,17 @@ wait_thre:
     j print_loop
 
 print_done:
-    # Delay loop: t4 = 0; while (t4 < 100000) t4++
+    # Delay loop
     li t4, 0
     li t5, 100000
 delay_loop:
     addi t4, t4, 1
     blt t4, t5, delay_loop
 
-    # Test finisher write to exit QEMU (32-bit store)
+    # Test finisher write (32-bit)
     lui t5, 0x100            # t5 = 0x100000
     li t6, 0x5555
-    sw t6, 0(t5)             # word store
+    sw t6, 0(t5)
     fence w, w
 
 hang:

@@ -5,9 +5,8 @@ _start:
     # UART base: 0x10000000
     lui t0, 0x10000          # t0 = 0x10000000
 
-    # Load string address (absolute)
-    lui t1, %hi(string)
-    addi t1, t1, %lo(string)
+    # Load string address
+    la t1, string
 
 print_loop:
     lbu t2, 0(t1)
