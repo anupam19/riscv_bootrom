@@ -14,17 +14,14 @@
 #define TEST_FINISHER_ADDR 0x100000
 #endif
 
-/* Volatile UART MMIO pointer */
-volatile unsigned char *const uart = (volatile unsigned char *)UART_BASE_ADDR;
-
-/* SiFive Test Finisher pointer (32-bit writes) */
-volatile unsigned int *const test_finisher = (volatile unsigned int *)TEST_FINISHER_ADDR;
+/* UART MMIO base as a macro to avoid global pointer variables */
+#define UART      ((volatile unsigned char *)UART_BASE_ADDR)
+#define TEST_FINISHER ((volatile unsigned int *)TEST_FINISHER_ADDR)
 
 /* UART helper: wait for THRE (bit 5 of LSR at offset 5) */
 static inline void uart_wait_tx_ready(void)
 {
-    while (!(uart[5] & 0x20)) {
-        /* Hint to CPU that we're spinning */
+    while (!(UART[5] & 0x20)) {
         __asm__ volatile("addi x0, x0, 1");
     }
 }
@@ -34,13 +31,12 @@ static void uart_putc(char c)
 {
     uart_wait_tx_ready();
     if (c == '\n') {
-        uart[0] = '\r'; /* THR */
-        /* Ensure ordering */
+        UART[0] = '\r';
         __asm__ volatile("fence w, w" ::: "memory");
         uart_wait_tx_ready();
-        uart[0] = '\n';
+        UART[0] = '\n';
     } else {
-        uart[0] = c;
+        UART[0] = c;
     }
     __asm__ volatile("fence w, w" ::: "memory");
 }
@@ -56,12 +52,10 @@ static void uart_puts(const char *s)
 /* _start entry point — called via jalr from BootROM */
 void _start(void)
 {
-    /* Print success marker */
     uart_puts("PAYLOAD: OK\r\n");
 
-     /* Signal success to QEMU via SiFive Test Finisher */
-     volatile unsigned int *const test_finisher = (volatile unsigned int *)TEST_FINISHER_ADDR;
-     test_finisher[0] = 0x5555;
+    /* Write 32-bit value to test finisher to exit QEMU */
+    TEST_FINISHER[0] = 0x5555;
 
     /* Should not reach here — test_finisher write causes QEMU exit */
     while (1) {

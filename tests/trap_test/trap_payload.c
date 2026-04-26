@@ -14,15 +14,12 @@
 #define UART_BASE_ADDR 0x10000000
 #endif
 
-#ifndef TEST_FINISHER_ADDR
-#define TEST_FINISHER_ADDR 0x100000
-#endif
-
-volatile unsigned char *const uart = (volatile unsigned char *)UART_BASE_ADDR;
+/* UART MMIO base as macro to avoid global pointer dependency */
+#define UART ((volatile unsigned char *)UART_BASE_ADDR)
 
 static inline void uart_wait_tx_ready(void)
 {
-    while (!(uart[5] & 0x20)) {
+    while (!(UART[5] & 0x20)) {
         __asm__ volatile("addi x0, x0, 1");
     }
 }
@@ -31,12 +28,12 @@ static void uart_putc(char c)
 {
     uart_wait_tx_ready();
     if (c == '\n') {
-        uart[0] = '\r';
+        UART[0] = '\r';
         __asm__ volatile("fence w, w" ::: "memory");
         uart_wait_tx_ready();
-        uart[0] = '\n';
+        UART[0] = '\n';
     } else {
-        uart[0] = c;
+        UART[0] = c;
     }
     __asm__ volatile("fence w, w" ::: "memory");
 }
