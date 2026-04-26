@@ -20,8 +20,8 @@ TARGET := trap_payload
 ELF := $(TARGET).elf
 BIN := $(TARGET).bin
 
-SRC := trap_payload.c
-OBJ := $(SRC:.c=.o)
+SRC := trap_payload.S
+OBJ := $(SRC:.S=.o)
 
 .PHONY: all clean
 
@@ -33,7 +33,7 @@ $(ELF): $(OBJ) trap_payload.ld
 $(BIN): $(ELF)
 	$(OBJCOPY) -O binary $< $@
 
-%.o: %.c
+%.o: %.S
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
