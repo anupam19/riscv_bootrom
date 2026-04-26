@@ -1,0 +1,82 @@
+name: QEMU Integration Test
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  qemu-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install RISC-V toolchain and QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-riscv64-linux-gnu \
+            binutils-riscv64-linux-gnu \
+            qemu-system-riscv64
+
+      - name: Build BootROM
+        run: |
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu- EXTRA_CFLAGS="-DENABLE_UART_DEBUG"
+          ls -la build/
+          riscv64-linux-gnu-objdump -d build/bootrom.elf > bootrom.disasm
+          echo "===== Disassembly of boot_main ====="
+          grep -A20 "<boot_main>:" -m20 bootrom.disasm || true
+
+      - name: Build test payload
+        run: |
+          make -C tests/payload TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+          ls -la tests/payload/
+          echo "===== Payload binary (first 64 bytes) ====="
+          od -An -tx1 -N 64 tests/payload/payload.bin
+          echo "===== Payload ELF sections ====="
+          riscv64-linux-gnu-objdump -h tests/payload/payload.elf
+          echo "===== Payload disassembly ====="
+          riscv64-linux-gnu-objdump -d tests/payload/payload.elf
+
+      - name: Build simple test payload
+        run: |
+          make -C tests/simple_payload TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+          ls -la tests/simple_payload/
+          echo "===== Simple payload binary (first 64 bytes) ====="
+          od -An -tx1 -N 64 tests/simple_payload/simple_payload.bin
+          echo "===== Simple payload ELF sections ====="
+          riscv64-linux-gnu-objdump -h tests/simple_payload/simple_payload.elf
+          echo "===== Simple payload disassembly ====="
+          riscv64-linux-gnu-objdump -d tests/simple_payload/simple_payload.elf
+
+      - name: Run simple test (test finisher only)
+        run: |
+          python3 tests/run_simple_test.py
+
+      - name: Run QEMU integration test
+        run: |
+          python3 tests/run_qemu_test.py
+
+      - name: Build trap test payload
+        run: |
+          make -C tests/trap_test TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+
+      - name: Run trap test
+        run: |
+          python3 tests/run_trap_test.py
+
+      - name: Upload BootROM binary on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootrom-bin-and-logs
+          path: |
+            build/bootrom.bin
+            qemu_output.log
+            tests/qemu_output.log
+          retention-days: 7
