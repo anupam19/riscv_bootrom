@@ -2,17 +2,17 @@
     .global _start
     .type _start, @function
 _start:
-    # UART base: 0x10000000
-    lui t0, 0x10000          # t0 = 0x10000000
+    lui t0, 0x10000          # UART base = 0x10000000
 
-    # Load string address
-    la t1, string
+    # Load absolute address of string (hi20 + lo12)
+    lui t1, %hi(string)
+    addi t1, t1, %lo(string)
 
 print_loop:
     lbu t2, 0(t1)
     beqz t2, print_done
 
-    # Wait for THRE (bit 5 of LSR at offset 5)
+    # Wait for THRE (LSR[5])
 wait_thre:
     lbu t3, 5(t0)
     andi t3, t3, 0x20
@@ -20,20 +20,19 @@ wait_thre:
 
     sb t2, 0(t0)
     fence w, w
-
     addi t1, t1, 1
     j print_loop
 
 print_done:
-    # Delay loop
+    # Delay loop: 100000 iterations
     li t4, 0
     li t5, 100000
 delay_loop:
     addi t4, t4, 1
     blt t4, t5, delay_loop
 
-    # Test finisher write (32-bit)
-    lui t5, 0x100            # t5 = 0x100000
+    # Write test finisher: 32-bit store
+    lui t5, 0x100            # 0x100000
     li t6, 0x5555
     sw t6, 0(t5)
     fence w, w

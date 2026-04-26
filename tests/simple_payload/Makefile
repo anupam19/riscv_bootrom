@@ -15,8 +15,8 @@ TARGET := simple_payload
 ELF := $(TARGET).elf
 BIN := $(TARGET).bin
 
-SRC := simple_payload.c
-OBJ := $(SRC:.c=.o)
+SRC := simple_payload.S
+OBJ := $(SRC:.S=.o)
 
 .PHONY: all clean
 
