@@ -22,10 +22,11 @@ EXPECTED = [
 QEMU_CMD = [
     "qemu-system-riscv64",
     "-machine", "virt",
-     "-nographic",
-     "-bios", "build/bootrom.bin",
-     "-device", "loader,file=tests/payload/payload.bin,addr=0x80020000,force-raw=on",
- ]
+    "-nographic",
+    "-bios", "build/bootrom.bin",
+    "-device", "loader,file=tests/payload/payload.bin,addr=0x80020000,force-raw=on",
+    "-d", "guest_errors,mmu",  # debug: log guest memory errors and MMU activities
+]
 
 TIMEOUT_SEC = 60
 
