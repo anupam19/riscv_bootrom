@@ -5,9 +5,9 @@ _start:
     # UART base: 0x10000000
     lui t0, 0x10000          # t0 = 0x10000000
 
-    # Get address of string via PC-relative
-    auipc t1, %pcrel_hi(string)
-    addi t1, t1, %pcrel_lo(string)
+    # Load string address (absolute)
+    lui t1, %hi(string)
+    addi t1, t1, %lo(string)
 
 print_loop:
     lbu t2, 0(t1)
@@ -33,17 +33,17 @@ delay_loop:
     addi t4, t4, 1
     blt t4, t5, delay_loop
 
-    # Test finisher write to exit QEMU
+    # Test finisher write to exit QEMU (32-bit store)
     lui t5, 0x100            # t5 = 0x100000
-    li t6, 0x5555            # FINISHER_PASS (lower 16 bits)
-    sw t6, 0(t5)             # 32-bit store; QEMU expects word
+    li t6, 0x5555
+    sw t6, 0(t5)             # word store
     fence w, w
 
 hang:
     wfi
     j hang
 
-    # String placed in text section
+    .section .rodata
     .align 2
 string:
     .string "PAYLOAD: OK\r\n"
