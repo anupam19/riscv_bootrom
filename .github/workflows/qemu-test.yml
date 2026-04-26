@@ -20,8 +20,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            gcc-riscv64-linux-gnu \
-            binutils-riscv64-linux-gnu \
+            gcc-riscv64-unknown-elf \
+            binutils-riscv64-unknown-elf \
             qemu-system-riscv
 
       - name: Build BootROM
