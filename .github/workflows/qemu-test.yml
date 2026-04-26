@@ -45,6 +45,10 @@ jobs:
         run: |
           make -C tests/simple_payload TOOLCHAIN_PREFIX=riscv64-linux-gnu-
           ls -la tests/simple_payload/
+          echo "===== Simple payload binary (first 64 bytes) ====="
+          od -An -tx1 -N 64 tests/simple_payload/simple_payload.bin
+          echo "===== Simple payload ELF sections ====="
+          riscv64-linux-gnu-objdump -h tests/simple_payload/simple_payload.elf
 
       - name: Run simple test (test finisher only)
         run: |
