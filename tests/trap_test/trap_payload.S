@@ -27,9 +27,10 @@ wait_thre:
 print_done:
     # Short delay
     li t4, 0
+    li t5, 10000
 delay_loop:
     addi t4, t4, 1
-    blt t4, 10000, delay_loop
+    blt t4, t5, delay_loop
 
     # Trigger ECALL (encoded 0x00000073)
     .word 0x00000073

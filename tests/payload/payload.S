@@ -2,42 +2,42 @@
     .global _start
     .type _start, @function
 _start:
-    # UART base: 0x10000000 (lui sets upper 20 bits)
+    # UART base: 0x10000000
     lui t0, 0x10000          # t0 = 0x10000000
 
-    # Load string address (absolute) into t1
+    # Load string address into t1
     lui t1, %hi(string)
     addi t1, t1, %lo(string)
 
 print_loop:
-    lbu t2, 0(t1)            # load byte
-    beqz t2, print_done      # null terminator -> done
+    lbu t2, 0(t1)
+    beqz t2, print_done
 
-    # Wait for UART THRE (bit 5 of LSR at offset 5)
+    # Wait for THRE (bit 5 of LSR at offset 5)
 wait_thre:
     lbu t3, 5(t0)
     andi t3, t3, 0x20
     beqz t3, wait_thre
 
-    sb t2, 0(t0)             # write character
-    fence w, w               # ensure commit
+    sb t2, 0(t0)
+    fence w, w
 
     addi t1, t1, 1
     j print_loop
 
 print_done:
-    # Simple delay loop: for (t4 = 0; t4 < 100000; t4++)
+    # Delay loop: t4 = 0; while (t4 < 100000) t4++
     li t4, 0
+    li t5, 100000
 delay_loop:
     addi t4, t4, 1
-    blt t4, 100000, delay_loop
+    blt t4, t5, delay_loop
 
-    # Write test finisher to exit QEMU cleanly.
-    # Device at 0x100000 (VIRT_TEST in QEMU virt).
+    # Test finisher write to exit QEMU
     lui t5, 0x100            # t5 = 0x100000
-    li t6, 0x5555            # FINISHER_PASS
-    sh t6, 0(t5)             # 16-bit store
-    fence w, w               # ensure write completes
+    li t6, 0x5555
+    sh t6, 0(t5)             # halfword store
+    fence w, w
 
 hang:
     wfi
