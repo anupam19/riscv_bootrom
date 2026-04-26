@@ -32,7 +32,7 @@ jobs:
           echo "===== Disassembly of boot_main ====="
           grep -A20 "<boot_main>:" -m20 bootrom.disasm || true
 
-       - name: Build test payload
+      - name: Build test payload
         run: |
           make -C tests/payload TOOLCHAIN_PREFIX=riscv64-linux-gnu-
           ls -la tests/payload/
