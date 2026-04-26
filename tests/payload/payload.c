@@ -52,16 +52,20 @@ static void uart_puts(const char *s)
 /* _start entry point — called via jalr from BootROM */
 void _start(void)
 {
-    /* Early debug: send a single character without any function calls
-       to verify payload execution and UART functionality. */
-    volatile unsigned char *uart = (volatile unsigned char *)UART_BASE_ADDR;
-    while (!(uart[5] & 0x20)) {
-        __asm__ volatile("addi x0, x0, 1");
-    }
-    uart[0] = 'X';
-    __asm__ volatile("fence w, w" ::: "memory");
-
-    uart_puts("PAYLOAD: OK\r\n");
+    /* Print message without a string literal to avoid memory loads. */
+    uart_putc('P');
+    uart_putc('A');
+    uart_putc('Y');
+    uart_putc('L');
+    uart_putc('O');
+    uart_putc('A');
+    uart_putc('D');
+    uart_putc(':');
+    uart_putc(' ');
+    uart_putc('O');
+    uart_putc('K');
+    uart_putc('\r');
+    uart_putc('\n');
 
     /* Small delay to allow UART to transmit all characters before we
        trigger QEMU exit via the test finisher. */

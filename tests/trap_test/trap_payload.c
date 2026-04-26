@@ -47,7 +47,16 @@ static void uart_puts(const char *s)
 
 void _start(void)
 {
-    uart_puts("TRAP_TEST: triggering ECALL...\r\n");
+    /* Print message character-by-character to avoid memory loads */
+    uart_putc('T'); uart_putc('R'); uart_putc('A'); uart_putc('P');
+    uart_putc('_'); uart_putc('T'); uart_putc('E'); uart_putc('S');
+    uart_putc('T'); uart_putc(':'); uart_putc(' ');
+    uart_putc('t'); uart_putc('r'); uart_putc('i'); uart_putc('g');
+    uart_putc('g'); uart_putc('e'); uart_putc('r'); uart_putc('i');
+    uart_putc('n'); uart_putc('g'); uart_putc(' ');
+    uart_putc('E'); uart_putc('C'); uart_putc('A'); uart_putc('L');
+    uart_putc('L'); uart_putc('.'); uart_putc('.'); uart_putc('.');
+    uart_putc('\r'); uart_putc('\n');
 
     /* Small delay to ensure message is transmitted before trap */
     for (volatile int i = 0; i < 10000; i++) {
