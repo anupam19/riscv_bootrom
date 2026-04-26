@@ -5,9 +5,9 @@ _start:
     # UART base: 0x10000000
     lui t0, 0x10000          # t0 = 0x10000000
 
-    # Load string address into t1
-    lui t1, %hi(string)
-    addi t1, t1, %lo(string)
+    # Get address of string via PC-relative
+    auipc t1, %pcrel_hi(string)
+    addi t1, t1, %pcrel_lo(string)
 
 print_loop:
     lbu t2, 0(t1)
@@ -43,7 +43,7 @@ hang:
     wfi
     j hang
 
-    .section .rodata
+    # String placed in text section
     .align 2
 string:
     .string "PAYLOAD: OK\r\n"
