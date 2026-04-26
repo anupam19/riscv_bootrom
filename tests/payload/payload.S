@@ -2,37 +2,111 @@
     .global _start
     .type _start, @function
 _start:
-    lui t0, 0x10000          # UART base = 0x10000000
+    # UART base: 0x10000000
+    lui t0, 0x10000
 
-    # Load absolute address of string (hi20 + lo12)
-    lui t1, %hi(string)
-    addi t1, t1, %lo(string)
-
-print_loop:
-    lbu t2, 0(t1)
-    beqz t2, print_done
-
-    # Wait for THRE (LSR[5])
-wait_thre:
-    lbu t3, 5(t0)
-    andi t3, t3, 0x20
-    beqz t3, wait_thre
-
-    sb t2, 0(t0)
+    # ---- print character in t1 ----
+# macro: wait for THRE then store; use repeated block for each char
+    li t1, 'P'
+1:  lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 1b
+    sb t1, 0(t0)
     fence w, w
-    addi t1, t1, 1
-    j print_loop
 
-print_done:
-    # Delay loop: 100000 iterations
-    li t4, 0
-    li t5, 100000
+    li t1, 'A'
+2:  lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 2b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, 'Y'
+3:  lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 3b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, 'L'
+4:  lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 4b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, 'O'
+5:  lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 5b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, 'A'
+6:  lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 6b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, 'D'
+7:  lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 7b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, ':'
+8:  lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 8b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, ' '
+9:  lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 9b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, 'O'
+10: lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 10b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, 'K'
+11: lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 11b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, '\r'
+12: lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 12b
+    sb t1, 0(t0)
+    fence w, w
+
+    li t1, '\n'
+13: lbu t2, 5(t0)
+    andi t2, t2, 0x20
+    beqz t2, 13b
+    sb t1, 0(t0)
+    fence w, w
+
+    # Delay loop
+    li t3, 0
+    li t4, 100000
 delay_loop:
-    addi t4, t4, 1
-    blt t4, t5, delay_loop
+    addi t3, t3, 1
+    blt t3, t4, delay_loop
 
-    # Write test finisher: 32-bit store
-    lui t5, 0x100            # 0x100000
+    # Write test finisher (word store to 0x100000)
+    lui t5, 0x100
     li t6, 0x5555
     sw t6, 0(t5)
     fence w, w
@@ -40,8 +114,3 @@ delay_loop:
 hang:
     wfi
     j hang
-
-    .section .rodata
-    .align 2
-string:
-    .string "PAYLOAD: OK\r\n"
