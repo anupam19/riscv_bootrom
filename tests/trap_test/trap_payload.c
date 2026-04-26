@@ -14,6 +14,10 @@
 #define UART_BASE_ADDR 0x10000000
 #endif
 
+#ifndef TEST_FINISHER_ADDR
+#define TEST_FINISHER_ADDR 0x1000000
+#endif
+
 volatile unsigned char *const uart = (volatile unsigned char *)UART_BASE_ADDR;
 
 static inline void uart_wait_tx_ready(void)
