@@ -13,7 +13,7 @@ QEMU_CMD = [
     "-machine", "virt",
     "-nographic",
     "-bios", "build/bootrom.bin",
-    "-device", "loader,file=tests/simple_payload/simple_payload.bin,addr=0x80020000,force-raw=on,cpu-num=0",
+    "-device", "loader,file=tests/simple_payload/simple_payload.bin,addr=0x80020000,force-raw=on",
 ]
 
 TIMEOUT_SEC = 30

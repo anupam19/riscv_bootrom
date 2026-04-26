@@ -26,7 +26,7 @@ QEMU_CMD = [
     "-machine", "virt",
     "-nographic",
     "-bios", "build/bootrom.bin",
-    "-device", "loader,file=tests/payload/payload.bin,addr=0x80020000,force-raw=on,cpu-num=0",
+    "-device", "loader,file=tests/payload/payload.bin,addr=0x80020000,force-raw=on",
     "-d", "guest_errors,mmu",
 ]
 
