@@ -1,0 +1,58 @@
+name: QEMU Integration Test
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  qemu-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Install RISC-V toolchain and QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-riscv64-linux-gnu \
+            binutils-riscv64-linux-gnu \
+            qemu-system-riscv
+
+      - name: Build BootROM
+        run: |
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu- CFLAGS+=" -g"
+          ls -la build/
+
+      - name: Build test payload
+        run: |
+          make -C tests/payload TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+          ls -la tests/payload/
+
+      - name: Run QEMU integration test
+        run: |
+          python3 tests/run_qemu_test.py
+
+      - name: Build trap test payload
+        run: |
+          make -C tests/trap_test TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+
+      - name: Run trap test
+        run: |
+          python3 tests/run_trap_test.py
+
+      - name: Upload BootROM binary on failure
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: bootrom-bin-and-logs
+          path: |
+            build/bootrom.bin
+            qemu_output.log
+            tests/qemu_output.log
+          retention-days: 7
