@@ -49,6 +49,8 @@ jobs:
           od -An -tx1 -N 64 tests/simple_payload/simple_payload.bin
           echo "===== Simple payload ELF sections ====="
           riscv64-linux-gnu-objdump -h tests/simple_payload/simple_payload.elf
+          echo "===== Simple payload disassembly ====="
+          riscv64-linux-gnu-objdump -d tests/simple_payload/simple_payload.elf
 
       - name: Run simple test (test finisher only)
         run: |
