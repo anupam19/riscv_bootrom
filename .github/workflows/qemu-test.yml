@@ -45,6 +45,15 @@ jobs:
         run: |
           python3 tests/run_qemu_test.py
 
+      - name: Build simple test payload
+        run: |
+          make -C tests/simple_payload TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+          ls -la tests/simple_payload/
+
+      - name: Run simple test (test finisher only)
+        run: |
+          python3 tests/run_simple_test.py
+
       - name: Build trap test payload
         run: |
           make -C tests/trap_test TOOLCHAIN_PREFIX=riscv64-linux-gnu-
