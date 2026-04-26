@@ -13,6 +13,7 @@ MABI  ?= lp64
  CFLAGS := -ffreestanding -nostdlib -march=$(MARCH) -mabi=$(MABI) \
            -O2 -Wall -Wextra \
            -fno-pic -no-pie \
+           -mcmodel=medany \
            -I../../include -I../../drivers/timer -I../../drivers/plic -I../../plat/generic
 
 LDFLAGS := -T payload.ld -nostdlib
