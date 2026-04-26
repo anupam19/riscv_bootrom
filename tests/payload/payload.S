@@ -35,8 +35,8 @@ delay_loop:
 
     # Test finisher write to exit QEMU
     lui t5, 0x100            # t5 = 0x100000
-    li t6, 0x5555
-    sh t6, 0(t5)             # halfword store
+    li t6, 0x5555            # FINISHER_PASS (lower 16 bits)
+    sw t6, 0(t5)             # 32-bit store; QEMU expects word
     fence w, w
 
 hang:
