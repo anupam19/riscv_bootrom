@@ -16,7 +16,7 @@
 
 /* UART MMIO base as a macro to avoid global pointer variables */
 #define UART      ((volatile unsigned char *)UART_BASE_ADDR)
-#define TEST_FINISHER ((volatile unsigned int *)TEST_FINISHER_ADDR)
+#define TEST_FINISHER ((volatile unsigned short *)TEST_FINISHER_ADDR)
 
 /* UART helper: wait for THRE (bit 5 of LSR at offset 5) */
 static inline void uart_wait_tx_ready(void)
@@ -54,8 +54,16 @@ void _start(void)
 {
     uart_puts("PAYLOAD: OK\r\n");
 
-    /* Write 32-bit value to test finisher to exit QEMU */
-    TEST_FINISHER[0] = 0x5555;
+    /* Small delay to allow UART to transmit all characters before we
+       trigger QEMU exit via the test finisher. */
+    for (volatile int i = 0; i < 100000; i++) { }
+
+    /* Ensure all UART writes complete before triggering the test finisher. */
+    __asm__ volatile ("fence w, w" ::: "memory");
+
+    /* Write to SiFive Test Finisher to exit QEMU.
+       Use 16-bit halfword store; device accepts this and triggers exit. */
+    *TEST_FINISHER = (unsigned short)0x5555;
 
     /* Should not reach here — test_finisher write causes QEMU exit */
     while (1) {

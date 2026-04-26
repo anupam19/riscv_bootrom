@@ -12,11 +12,16 @@ MEMORY
 
 SECTIONS
 {
-  .text :
-  {
-    . = ALIGN(4);
-    _start = .;
-    *(.text .text.*)
-    . = ALIGN(4);
-  } > RAM
+   .text :
+   {
+     . = ALIGN(4);
+     _start = .;
+     *(.text .text.*)
+     . = ALIGN(4);
+   } > RAM
+
+   .rodata :
+   {
+     *(.rodata .rodata.*)
+   } > RAM
 }
