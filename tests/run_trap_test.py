@@ -24,11 +24,10 @@ QEMU_CMD = [
     "10s",
     "qemu-system-riscv64",
     "-machine", "virt",
-    "-nographic",
-    "-bios", "build/bootrom.bin",
-    "-device", "loader,file=tests/trap_test/trap_payload.bin,addr=0x80020000",
-    "-serial", "stdio",
-]
+     "-nographic",
+     "-bios", "build/bootrom.bin",
+     "-device", "loader,file=tests/trap_test/trap_payload.bin,addr=0x80020000",
+ ]
 
 TIMEOUT_SEC = 15
 

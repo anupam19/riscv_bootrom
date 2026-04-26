@@ -22,11 +22,10 @@ EXPECTED = [
 QEMU_CMD = [
     "qemu-system-riscv64",
     "-machine", "virt",
-    "-nographic",
-    "-bios", "build/bootrom.bin",
-    "-device", "loader,file=tests/payload/payload.bin,addr=0x80020000",
-    "-serial", "stdio",
-]
+     "-nographic",
+     "-bios", "build/bootrom.bin",
+     "-device", "loader,file=tests/payload/payload.bin,addr=0x80020000",
+ ]
 
 TIMEOUT_SEC = 60
 
