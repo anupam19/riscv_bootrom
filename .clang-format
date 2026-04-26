@@ -4,7 +4,7 @@ IndentWidth: 4
 TabWidth: 4
 UseTab: Never
 BreakBeforeBraces: Linux
-AllowShortFunctionsOnASingleLine: None
+AllowShortFunctionsOnASingleLine: false
 ColumnLimit: 100
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
