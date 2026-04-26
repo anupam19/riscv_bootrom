@@ -49,7 +49,8 @@ void _start(void)
     uart_puts("TRAP_TEST: triggering ECALL...\r\n");
 
     /* Small delay to ensure message is transmitted before trap */
-    for (volatile int i = 0; i < 10000; i++) { }
+    for (volatile int i = 0; i < 10000; i++) {
+    }
 
     /* ECALL from M-mode — causes trap, BootROM handler prints
        "ECALL from M-mode" and then loops on wfi */

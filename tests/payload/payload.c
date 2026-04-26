@@ -31,7 +31,7 @@ static void uart_putc(char c)
 {
     uart_wait_tx_ready();
     if (c == '\n') {
-        uart[0] = '\r';  /* THR */
+        uart[0] = '\r'; /* THR */
         /* Ensure ordering */
         __asm__ volatile("fence w, w" ::: "memory");
         uart_wait_tx_ready();
@@ -57,7 +57,7 @@ void _start(void)
     uart_puts("PAYLOAD: OK\r\n");
 
     /* Signal success to QEMU via SiFive Test Finisher */
-    volatile unsigned short * const test_finisher = (volatile unsigned short *)TEST_FINISHER_ADDR;
+    volatile unsigned short *const test_finisher = (volatile unsigned short *)TEST_FINISHER_ADDR;
     test_finisher[0] = 0x5555;
 
     /* Should not reach here — test_finisher write causes QEMU exit */

@@ -22,7 +22,7 @@ jobs:
           sudo apt-get install -y \
             gcc-riscv64-unknown-elf \
             binutils-riscv64-unknown-elf \
-            qemu-system-riscv
+            qemu-system-riscv64
 
       - name: Build BootROM
         run: |
