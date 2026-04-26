@@ -33,6 +33,7 @@ TIMEOUT_SEC = 60
 def run_qemu_test():
     """Run QEMU subprocess, capture output, and verify expectations."""
     print("[INFO] Starting QEMU integration test...")
+    print("[DEBUG] QEMU command:", QEMU_CMD)
 
     # Ensure build artifacts exist
     if not os.path.exists("build/bootrom.bin"):
