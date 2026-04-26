@@ -18,6 +18,12 @@ CFLAGS := -ffreestanding -nostdlib -march=$(MARCH) -mabi=$(MABI) \
           -O2 -Wall -Wextra \
           -Iinclude -Idrivers/timer -Idrivers/plic -I$(abspath plat/generic)
 
+# Allow additional flags to be injected from command line (e.g., -DENABLE_UART_DEBUG)
+CFLAGS += $(EXTRA_CFLAGS)
+
+# Allow additional flags to be injected from command line (e.g., -DENABLE_UART_DEBUG)
+CFLAGS += $(EXTRA_CFLAGS)
+
 ASFLAGS := -march=$(MARCH) -mabi=$(MABI)
 
 LDFLAGS := -T linker.ld -nostdlib

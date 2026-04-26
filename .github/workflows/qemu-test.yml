@@ -26,7 +26,7 @@ jobs:
 
       - name: Build BootROM
         run: |
-          make TOOLCHAIN_PREFIX=riscv64-linux-gnu-
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu- EXTRA_CFLAGS="-DENABLE_UART_DEBUG"
           ls -la build/
           riscv64-linux-gnu-objdump -d build/bootrom.elf > bootrom.disasm
           echo "===== Disassembly of boot_main ====="
