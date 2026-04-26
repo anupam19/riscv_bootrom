@@ -105,8 +105,8 @@ delay_loop:
     addi t3, t3, 1
     blt t3, t4, delay_loop
 
-    # Write test finisher (word store to 0x100000)
-    lui t5, 0x100
+    # Write test finisher: 32-bit store to 0x100000
+    lui t5, 0x100            # t5 = 0x100000
     li t6, 0x5555
     sw t6, 0(t5)
     fence w, w
