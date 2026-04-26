@@ -11,7 +11,7 @@
 #endif
 
 #ifndef TEST_FINISHER_ADDR
-#define TEST_FINISHER_ADDR 0x1000000
+#define TEST_FINISHER_ADDR 0x100000
 #endif
 
 /* Volatile UART MMIO pointer */
