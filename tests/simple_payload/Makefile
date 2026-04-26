@@ -7,7 +7,7 @@ OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
 MARCH ?= rv64imac_zicsr
 MABI  ?= lp64
 
-CFLAGS := -ffreestanding -nostdlib -march=$(MARCH) -mabi=$(MABI) -O2 -Wall -Wextra
+ CFLAGS := -ffreestanding -nostdlib -march=$(MARCH) -mabi=$(MABI) -O2 -Wall -Wextra -fno-pic -no-pie
 
 LDFLAGS := -T simple_payload.ld -nostdlib
 

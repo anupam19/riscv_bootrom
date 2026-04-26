@@ -9,9 +9,10 @@ OBJCOPY := $(TOOLCHAIN_PREFIX)objcopy
 MARCH ?= rv64imac_zicsr
 MABI  ?= lp64
 
-CFLAGS := -ffreestanding -nostdlib -march=$(MARCH) -mabi=$(MABI) \
-          -O2 -Wall -Wextra \
-          -I../../include -I../../drivers/timer -I../../drivers/plic -I../../plat/generic
+ CFLAGS := -ffreestanding -nostdlib -march=$(MARCH) -mabi=$(MABI) \
+           -O2 -Wall -Wextra \
+           -fno-pic -no-pie \
+           -I../../include -I../../drivers/timer -I../../drivers/plic -I../../plat/generic
 
 LDFLAGS := -T trap_payload.ld -nostdlib
 
