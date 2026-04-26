@@ -14,8 +14,8 @@ wait_thre:
     sb t1, 0(t0)            # write 'X'
     fence w, w
 
-    # Now write test finisher
-    lui t0, 0x1000          # t0 = 0x1000000 (VIRT_TEST base)
+    # Now write test finisher: address 0x100000 (VIRT_TEST)
+    lui t0, 0x100           # t0 = 0x100000
     li t1, 0x5555
     sw t1, 0(t0)            # word store
     fence w, w
