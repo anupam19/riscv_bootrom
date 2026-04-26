@@ -14,6 +14,13 @@ wait_thre:
     sb t1, 0(t0)            # write 'X'
     fence w, w
 
+    # Small delay to allow UART to transmit
+    li t3, 0
+    li t4, 100000
+1:
+    addi t3, t3, 1
+    blt t3, t4, 1b
+
     # Now write test finisher: address 0x100000 (VIRT_TEST)
     lui t0, 0x100           # t0 = 0x100000
     li t1, 0x5555
