@@ -19,13 +19,15 @@ EXPECTED = [
 ]
 
 # QEMU configuration
+# NOTE: cpu-num=0 is required so the loader actually sets PC to the load address.
+# Without it, the payload is loaded but never executed.
 QEMU_CMD = [
     "qemu-system-riscv64",
     "-machine", "virt",
     "-nographic",
     "-bios", "build/bootrom.bin",
-    "-device", "loader,file=tests/payload/payload.bin,addr=0x80020000,force-raw=on",
-    "-d", "guest_errors,mmu",  # debug: log guest memory errors and MMU activities
+    "-device", "loader,file=tests/payload/payload.bin,addr=0x80020000,force-raw=on,cpu-num=0",
+    "-d", "guest_errors,mmu",
 ]
 
 TIMEOUT_SEC = 60
