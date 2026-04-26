@@ -17,6 +17,9 @@
 /* Volatile UART MMIO pointer */
 volatile unsigned char *const uart = (volatile unsigned char *)UART_BASE_ADDR;
 
+/* SiFive Test Finisher pointer (32-bit writes) */
+volatile unsigned int *const test_finisher = (volatile unsigned int *)TEST_FINISHER_ADDR;
+
 /* UART helper: wait for THRE (bit 5 of LSR at offset 5) */
 static inline void uart_wait_tx_ready(void)
 {
@@ -56,9 +59,9 @@ void _start(void)
     /* Print success marker */
     uart_puts("PAYLOAD: OK\r\n");
 
-    /* Signal success to QEMU via SiFive Test Finisher */
-    volatile unsigned short *const test_finisher = (volatile unsigned short *)TEST_FINISHER_ADDR;
-    test_finisher[0] = 0x5555;
+     /* Signal success to QEMU via SiFive Test Finisher */
+     volatile unsigned int *const test_finisher = (volatile unsigned int *)TEST_FINISHER_ADDR;
+     test_finisher[0] = 0x5555;
 
     /* Should not reach here — test_finisher write causes QEMU exit */
     while (1) {
