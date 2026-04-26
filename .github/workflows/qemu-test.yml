@@ -26,7 +26,7 @@ jobs:
 
       - name: Build BootROM
         run: |
-          make TOOLCHAIN_PREFIX=riscv64-linux-gnu- CFLAGS+=" -g"
+          make TOOLCHAIN_PREFIX=riscv64-linux-gnu-
           ls -la build/
 
       - name: Build test payload
